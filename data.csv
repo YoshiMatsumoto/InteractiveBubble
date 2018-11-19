@@ -1,0 +1,5 @@
+cat,name,value,icon,desc
+library,D3,30,img/d3.svg,D3.js
+library,Rapha?l,10,img/raphael.svg,Rapha?l is a cross-browser
+library,Relay,70,img/relay.svg,A JavaScript framework
+library,Three.js,40,img/threejs.png,Three.js allows the creation
