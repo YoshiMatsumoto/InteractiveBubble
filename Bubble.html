@@ -1,0 +1,170 @@
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <style>
+
+    body {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    text {
+        text-anchor: middle;
+        fill: #2e2e2e;
+        font-size: 8px;
+        width: 100px;
+        overflow-wrap: break-word;
+    }
+
+    
+    </style>
+  </head>
+  <body>
+    <!-- <script src="https://d3js.org/d3.v4.min.js"></script> -->
+    <script src="js/d3.min.js"></script>
+
+    <script>
+
+        var width = window.innerWidth, height = window.innerHeight;
+        var svg = d3.select("body").append("svg").attr("width", width).attr("height", height);
+        var pack = d3.pack()
+            .size([width, height])
+            .padding(1.5);
+        
+        var desc = [];
+        d3.csv("kanso.csv", function (error, data) {
+            //感想部分だけ抽出
+            data.forEach(function( value ) {
+                desc.push(value.desc);
+                shuffle(desc)
+                
+            });
+        });
+        
+        
+        console.log(desc)
+
+        redraw(randomizeData());
+            d3.interval(function(){
+            redraw(randomizeData());
+            }, 150000);
+        
+            
+        function shuffle(array) {
+            var m = array.length, t, i;
+            // While there remain elements to shuffle…
+            while (m) {
+                // Pick a remaining element…
+                i = Math.floor(Math.random() * m--);
+                // And swap it with the current element.
+                t = array[m];
+                array[m] = array[i];
+                array[i] = t;
+            }
+            return array;
+            }
+
+        // //シャッフルする関数
+        // function shuffle(array){
+        //     for(i = array.length - 1; i > 0; i--) {
+        //         var j = Math.floor(Math.random() * (i + 1));
+        //         var tmp = array[i];
+        //         array[i] = array[j];
+        //         array[j] = tmp;
+        //     }
+        // }
+        
+        function redraw(classes){
+
+            // transition
+            var t = d3.transition()
+                .duration(750);
+
+            // hierarchy
+            var h = d3.hierarchy({children: classes})
+                .sum(function(d) { return d.size;})
+
+            //JOIN
+            var circle = svg.selectAll("path")
+                .data(pack(h).leaves(), function(d){ return d.data.name; });
+            
+            var text = svg.selectAll("text")
+                .data(pack(h).leaves(), function(d){ return d.data.name; });
+
+            //EXIT
+            circle.exit()
+                .style("fill", "#ecf0f1")
+            .transition(t)
+                .attr("d", function(d){ return circleToPath(d.x, d.y, 1e-6); })
+                .remove();
+
+            text.exit()
+            .transition(t)
+                .attr("opacity", 1e-6)
+                .remove();
+
+            //UPDATE
+            circle
+            .transition(t)
+                .attr("d", function(d){ return circleToPath(d.x, d.y, d.r); })
+                .style("fill", "#f1c40f");
+
+            text
+            .transition(t)
+                .attr("x", function(d){ return d.x; })
+                .attr("y", function(d){ return d.y; });
+
+            //ENTER
+            circle.enter().append("path")
+                .attr("d", function(d){ return circleToPath(d.x, d.y, 1e-6); })
+                .style("fill", "#fff")
+            .transition(t)
+                .attr("d", function(d){ return circleToPath(d.x, d.y, d.r); })
+                .style("fill", "#1abc9c");
+
+            text.enter().append("text")
+                .attr("opacity", 1e-6)
+                .attr("x", function(d){ return d.x; })
+                .attr("y", function(d){return d.y})
+                .text(function(d){ return d.data.name; })
+            .transition(t)
+                .attr("opacity", 1);
+
+            text.selectAll("tspan.text")
+                .data(d => d.data.name.split("\n"))
+                .enter()
+                .append("tspan")
+                .attr("class", "text")
+                .text(d => d)
+                .attr("x", 20)
+                .attr("dx", 10)
+                .attr("dy", 22)
+                .remove();
+            }
+
+
+        function randomizeData(){
+            var d0 = desc
+            d1 = [],
+            d2 = [];
+            for (var i = 0; i < random(1, desc.length); i++){
+                d1.push(d0[i]);
+            }
+            d1.forEach(function(d){
+                d2.push({name: d, size: random(10, 20)})
+            });
+            return d2;
+        }
+
+        function random(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function circleToPath(cx, cy, r){
+            return "M" + cx + "," + cy + "m" + (-r) + ",0a" + r + "," + r + " 0 1,0 " + (r * 2) + ",0a" + r + "," + r + " 0 1,0 " + (-r * 2) + ",0";
+        }
+
+    </script>
+  </body>
+</html>

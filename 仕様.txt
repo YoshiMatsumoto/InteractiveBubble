@@ -1,0 +1,9 @@
+cat1 ジグザグ道路
+cat2 アウトドアリビング
+cat3 かごンドラ
+cat4 ひらけ地下！
+cat5 ひろがれPark(ing)
+cat6 FILMing パーク
+cat7 SKEアドベンチャー！
+cat8 もっと使える広場
+cat9 その他
